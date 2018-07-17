@@ -21,18 +21,30 @@ public class main {
 		//Array List de Columnas
 		ArrayList<ArrayList<Integer>> columnas = archivo.get_Columnas();
 		
-		int columnasResueltas[] = new int[M];
-		int filasResueltas[] = new int[N];
+		//Arrays de columnas y filas resueltas
+		boolean columnasResueltas[] = new boolean[M];
+		boolean filasResueltas[] = new boolean[N];
 		
 		int iteracion = 0;
 		int cont = 0;
-
+		String tipo;
+		
+		
+		//Se inicializa la matriz con el caracter ' ' (Posiciï¿½n disponible)
+		for(int i=0; i<N; i++)
+		{	
+			for(int j=0; j<M; j++)
+			{
+				matriz[i][j] = ' ';
+			}
+			
+		}
 		
 		/*
 		 * 
 		 * CICLO ITERATIVO A IMPLEMENTAR PRONTO:
 		 * 
-		 * El ciclo acaba cuando todas las filas y columnas están resueltas (Juego terminado)
+		 * El ciclo acaba cuando todas las filas y columnas estï¿½n resueltas (Juego terminado)
 		 * o cuando no se puede avanzar a una siguiente iteracion (Falta de reglas para llegar a la solucion).
 		 * 
 		 * 
@@ -50,118 +62,249 @@ public class main {
 		
 		*/
 		
-		while( nonoResuelto(filasResueltas,columnasResueltas) || cont < 4 )
+	
+		//!nonoResuelto(filasResueltas,columnasResueltas) ||
+		while( cont < 4)
 		{
 			
-			//CICLO PARA FILAS
+			
+			System.out.println("\n**********************************");
+			System.out.println("\nJuego terminado?: " + nonoResuelto(filasResueltas,columnasResueltas));
+			
+			System.out.println("\n**********************************");
+			System.out.println("\n\t(WHILE: "+ cont + ")");
+			System.out.println("\n**********************************");
+			
+			/**--------------------------------CICLO DE FILAS--------------------------------*/
+			
+			tipo = "fila";
 			
 			for(int x=0 ; x<filas.size() ; x++)
 			{
 				int suma = 0;
+				int indice = x;
 				
-				if(filasResueltas[x]==0)
+				int posPrimerPintado = -1;
+				int posUltimoPintado = M;
+				
+				boolean disponiblesInicio = false;
+				boolean disponiblesFinal = false;
+				
+				int segmento = filas.get(x).get(0);
+				
+				//Suma de segmentos a pintar en la fila
+				for(int i=0; i<filas.get(x).size(); i++)
 				{
-					//SUMA DE CUADRADOS A PINTAR EN FILA
-					for(int i=0; i<filas.get(x).size(); i++)
+					suma = suma + filas.get(x).get(i);
+				}
+
+				//Encuentra la primera posición pintada
+				for(int i=0; i<M; i++)
+				{
+					if( matriz[x][i] == '#')
 					{
-						suma = suma + filas.get(x).get(i);
-					}
-					
-					//PINTAR REGLA 1 EN FILA	
-					if(filas.get(x).size()==1 && filas.get(x).get(0) == M)
+						posPrimerPintado = i;
+						break;
+					}	
+				}
+				
+				//Encuentra la ultima posición pintada
+				for(int i=M-1; i>=0; i--)
+				{
+					if( matriz[x][i] == '#')
 					{
-						for(int i=0; i<filas.get(x).size(); i++)
-						{
-							matriz[x][i] = '#';
-						}
+						posUltimoPintado = i;
+						break;
+					}	
+				}
+				
+				//Determina si existen posiciones disponibles antes de la primera posición pintada
+				for(int i=0; i<posPrimerPintado; i++)
+				{
+					if( matriz[x][i] == ' ')
+						disponiblesInicio=true;
+	
+				}
 						
-						filasResueltas[x]=1;
-						iteracion++;
-						mostrarMatriz(N,M,matriz,iteracion);
-						System.out.println("\n(Regla 1 - Fila: "+ (x+1) + ")");
-						
-							
-					}
+				//Determina si existen posiciones disponibles despues de la ultima posición pintada
+				for(int i=M-1; i>posUltimoPintado; i--)
+				{
+					if( matriz[x][i] == ' ')
+						disponiblesFinal=true;
+	
+				}
+				
+				//Se analiza la fila 'x' en caso de no estar resuelta
+				if(filasResueltas[x]==false)
+				{
 					
-					
-					//PINTAR REGLA 2 EN FILA
-					if(suma == (M-(filas.get(x).size()-1)))
-					{
-						
-						int indiceColumna = 0;
-						
-						for(int i=0; i<filas.get(x).size(); i++)
-						{
-							int segmento = filas.get(x).get(i);
-							
-							for(int j=0; j<segmento; j++)
-							{
-								//PINTA CON '#'
-								matriz[x][indiceColumna]='#';
-								indiceColumna++;
-							}
-							
-							//AGREGAR ESPACIO
-							if(i<filas.get(x).size()-1)
-							{
-								matriz[x][indiceColumna]='-';
-								indiceColumna++;
-							}
-							
-						}
-						filasResueltas[x]=1;
-						iteracion++;
-						mostrarMatriz(N,M,matriz,iteracion);
-						System.out.println("\n(Regla 2 - Fila: "+ (x+1) + ")");
-						
-					}
-					
-					//PINTAR REGLA 3 EN FILA	
+					//Se analiza la fila en caso de tener un solo segmento a pintar
 					if(filas.get(x).size()==1)
 					{
+						
+						/**PINTAR REGLA 1 EN FILA*/
+						if(filas.get(x).get(0) == M)
+						{
+							for(int i=0; i<filas.get(x).get(0); i++)
+							{
+								matriz[x][i] = '#';
+							}
+							
+							filasResueltas[x]=true;
+							iteracion++;
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,1);
+							
+						}
+						
+						/**PINTAR REGLA 6 EN FILA*/
+						if(filas.get(x).get(0) == 0 && filasResueltas[x]==false)
+						{
+							for(int i=0; i<M; i++)
+							{
+								matriz[x][i] = '-';
+							}
+							
+							filasResueltas[x]=true;
+							iteracion++;
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,6);
+							
+						}
+						
+						/**PINTAR REGLA 3 EN FILA*/
+						if(filasResueltas[x]==false)
+						{
+							//Caso en que la primera posición de la fila está pintada
+							if( matriz[x][0] == '#')
+							{
+								for(int i=0; i<segmento; i++)
+								{
+									matriz[x][i] = '#';
+								}
+								
+								for(int i=segmento; i< M; i++)
+								{
+									matriz[x][i] = '-';
+								}
+								
+								filasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,3);
+							}
+							
+							//Caso en que la ultima posición de la fila está pintada
+							if( matriz[x][M-1] == '#')
+							{
+								for(int i=0; i< M-segmento; i++)
+								{
+									matriz[x][i] = '-';
+								}
+								
+								for(int i=M-segmento; i< M; i++)
+								{
+									matriz[x][i] = '#';
+								}
+								filasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,3);
+							}
 
-						int segmento = filas.get(x).get(0);
-						
-						if( matriz[x][0] == '#')
-						{
-							for(int i=0; i<segmento; i++)
-							{
-								matriz[x][i] = '#';
-							}
-							
-							for(int i=segmento; i< M; i++)
-							{
-								matriz[x][i] = '-';
-							}
-							
-							filasResueltas[x]=1;
-							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 3 - Fila: "+ (x+1) + ")");
 						}
 						
-						if( matriz[x][M-1] == '#')
+						/**PINTAR REGLA 5 EN FILA*/
+						if(filas.get(x).get(0) == M-1 && filasResueltas[x]==false)
 						{
-							for(int i=0; i< M-segmento; i++)
+							//Caso en que la primera posición de la fila está 'no disponible'
+							if( matriz[x][0] == '-')
 							{
-								matriz[x][i] = '-';
+								for(int i=1; i< M; i++)
+								{
+									matriz[x][i] = '#';
+								}
+								filasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,5);
 							}
 							
-							for(int i=M-segmento; i< M; i++)
+							//Caso en que la ultima posición de la fila está 'no disponible'
+							if( matriz[x][M-1] == '-')
 							{
-								matriz[x][i] = '#';
+								for(int i=0; i< M-1; i++)
+								{
+									matriz[x][i] = '#';
+								}
+								filasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,5);
 							}
-							filasResueltas[x]=1;
-							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 3 - Fila: "+ (x+1) + ")");
+									
 						}
 						
-							
+						
+						/**PINTAR REGLA 9 EN FILA*/
+						if(posPrimerPintado > -1)
+						{
+							if(disponiblesInicio == false && filasResueltas[x] == false)
+							{
+								//Se pinta el segmento completo a partir de la primera posiciï¿½n pintada
+								for(int i=posPrimerPintado; i< posPrimerPintado + segmento; i++)
+								{
+									matriz[x][i] = '#';
+								}
+								
+								//Se actualizan las posiciones (posteriores al segmento) de 'disponibles' a 'no disponibles' 
+								for(int i=posPrimerPintado+segmento; i<M; i++)
+								{	
+									if( matriz[x][i] == ' ' )
+										matriz[x][i] = '-';	
+	
+								}	
+								
+								filasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,9);
+							}
+						}
+
 					}
 					
-					//PINTAR REGLA 4 EN FILA
-					if(filas.get(x).size()==2 )
+					
+					/**PINTAR REGLA 2 EN FILA*/
+					if(suma == (M-(filas.get(x).size()-1)) && filasResueltas[x]==false)
+					{
+						
+						int indiceFila = 0;
+						
+						//Se pintan todos los segmentos de la fila
+						for(int i=0; i<filas.get(x).size(); i++)
+						{
+
+							segmento = filas.get(x).get(i);
+							
+							//Se pinta un segmento completo
+							for(int j=0; j<segmento; j++)
+							{
+								matriz[x][indiceFila]='#';
+								indiceFila++;
+							}
+							
+							//Se agrega un espacio entre segmentos (posición 'no disponible')
+							if(i<filas.get(x).size()-1)
+							{
+								matriz[x][indiceFila]='-';
+								indiceFila++;
+							}
+							
+						}
+						filasResueltas[x]=true;
+						iteracion++;
+						mostrarMatriz(N,M,matriz,iteracion,indice,tipo,2);
+						
+					}
+					
+
+					
+					/**PINTAR REGLA 4 EN FILA*/
+					if(filas.get(x).size()==2 && filasResueltas[x]==false)
 					{
 						
 						if( matriz[x][0] == '#' && matriz[x][M-1] == '#' )
@@ -169,172 +312,320 @@ public class main {
 							int primerSegmento = filas.get(x).get(0);
 							int segundoSegmento = filas.get(x).get(1);
 							
+							//Se pinta el primer segmento al inicio
 							for(int i=0; i< primerSegmento; i++)
 							{
 								matriz[x][i] = '#';
 							}
 							
+							//Se pinta el segundo segmento al final
 							for(int i= M-1; i >= M-segundoSegmento; i--)
 							{
 								matriz[x][i] = '#';
 							}
 							
+							//Se agregan espacios (posiciones 'no disponibles' entre ambos segmentos
 							for(int i= primerSegmento; i < M-segundoSegmento; i++)
 							{
 								matriz[x][i] = '-';
 							}
 							
-							filasResueltas[x]=1;
+							filasResueltas[x]=true;
 							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 4 - Fila: "+ (x+1) + ")");
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,4);
 						}
 						
 					}
 					
-					//PINTAR REGLA 5 EN FILA
-					if(filas.get(x).size()==1 && filas.get(x).get(0) == M-1)
+
+					
+					//MARCAR FILA COMO RESUELTA SI LA CANTIDAD DE POSICIONES PINTADAS ES
+					//IGUAL A LA CANTIDAD DE POSICIONES A PINTAR
+					
+					
+					if(filasResueltas[x]==false)
 					{
-						if( matriz[x][0] == '-')
+						
+						boolean posicionesVacias = false;
+						int sumaPintadosEnFila = 0;
+						
+						for(int i=0; i< M; i++)
 						{
-							for(int i=1; i< M; i++)
-							{
-								matriz[x][i] = '#';
-							}
-							filasResueltas[x]=1;
-							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 5 - Fila: "+ (x+1) + ")");
+							//Determina si existen posiciones disponibles
+							if( matriz[x][i] == ' ')
+								posicionesVacias = true;
+								
+							//Suma la cantidad de posiciones pintadas
+							if( matriz[x][i] == '#')
+								sumaPintadosEnFila++;
 						}
 						
-						if( matriz[x][M-1] == '-')
+						
+						/**PINTAR REGLA 8 EN FILA*/
+						if(posicionesVacias == false )
 						{
-							for(int i=0; i< M-1; i++)
-							{
-								matriz[x][i] = '#';
-							}
-							filasResueltas[x]=1;
+							filasResueltas[x]=true;
 							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 5 - Fila: "+ (x+1) + ")");
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,8);
+							
 						}
-								
+						
+						/**PINTAR REGLA 7 EN FILA*/
+						
+						//Determina si la suma de las posiciones pintadas en la fila es
+						//igual a la suma de posiciones a pintar
+						if(sumaPintadosEnFila == suma && filasResueltas[x]==false)
+						{
+							//Las posiciones 'disponibles' se actualizan a 'no disponibles'
+							for(int i=0; i< M; i++)
+							{
+								if( matriz[x][i] == ' ' )
+									matriz[x][i] = '-';	
+							}
+							
+							filasResueltas[x]=true;
+							iteracion++;
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,7);
+						}
+	
+						
+
+
+						
 					}
 					
+				
 				}
 			
-			}
+			}//Fin - For de Filas
 		
 			
-			//CICLO PARA COLUMNAS
+			/**--------------------------------CICLO DE COLUMNAS--------------------------------*/
+			
+			tipo = "columna";
 			
 			for(int x=0 ; x<columnas.size() ; x++)
 			{
 				int suma = 0;
+				int indice = x;
 				
-				if(columnasResueltas[x]==0)
+				int posPrimerPintado = -1;
+				int posUltimoPintado = N;
+				
+				boolean disponiblesInicio = false;
+				boolean disponiblesFinal = false;
+				
+				int segmento = columnas.get(x).get(0);
+				
+				//Suma de segmentos a pintar en la fila
+				for(int i=0; i<columnas.get(x).size(); i++)
 				{
-					//SUMA DE CUADRADOS A PINTAR EN COLUMNA
-					for(int i=0; i<columnas.get(x).size(); i++)
+					suma = suma + columnas.get(x).get(i);
+				}
+
+				//Encuentra la primera posición pintada
+				for(int i=0; i<N ; i++)
+				{
+					if( matriz[i][x] == '#')
 					{
-						suma = suma + columnas.get(x).get(i);
-					}
-					
-					//PINTAR REGLA 1 EN COLUMNA	
-					if(columnas.get(x).size()==1 && columnas.get(x).get(0) == N)
+						posPrimerPintado = i;
+						break;
+					}	
+				}
+				
+				//Encuentra la ultima posición pintada
+				for(int i=N-1; i>=0; i--)
+				{
+					if( matriz[i][x] == '#')
 					{
+						posUltimoPintado = i;
+						break;
+					}	
+				}
+				
+				//Determina si existen posiciones disponibles antes de la primera posición pintada
+				for(int i=0; i<posPrimerPintado; i++)
+				{
+					if( matriz[i][x] == ' ')
+						disponiblesInicio=true;
+	
+				}
 						
-						for(int i=0; i<columnas.get(x).size(); i++)
-						{
-							matriz[i][x] = '#';
-						}
-						
-						columnasResueltas[x]=1;
-						iteracion++;
-						mostrarMatriz(N,M,matriz,iteracion);
-						System.out.println("\n(Regla 1 - Columna: "+ (x+1) + ")");
-							
-					}
-					
-					//PINTAR REGLA 2 EN COLUMNA
-					if(suma == (N-(columnas.get(x).size()-1)))
-					{
-						
-						int indiceFila = 0;
-						
-						for(int i=0; i<columnas.get(x).size(); i++)
-						{
-							int segmento = columnas.get(x).get(i);
-							
-							for(int j=0; j<segmento; j++)
-							{
-								//PINTA CON '#'
-								matriz[indiceFila][x]='#';
-								indiceFila++;
-							}
-							
-							//AGREGAR ESPACIO
-							if(i<columnas.get(x).size()-1)
-							{
-								matriz[indiceFila][x]='-';
-								indiceFila++;
-							}
-							
-						}
-						columnasResueltas[x]=1;
-						iteracion++;
-						mostrarMatriz(N,M,matriz,iteracion); 
-						System.out.println("\n(Regla 2 - Columna: "+ (x+1) + ")");
-						
-						
-					}
-					
-					//PINTAR REGLA 3 EN COLUMNA	
+				//Determina si existen posiciones disponibles despues de la ultima posición pintada
+				for(int i=N-1; i>posUltimoPintado; i--)
+				{
+					if( matriz[i][x] == ' ')
+						disponiblesFinal=true;
+	
+				}
+				 
+				//Se analiza la columna 'x' en caso de no estar resuelta
+				if(columnasResueltas[x]==false)
+				{
+					//Se analiza la columna en caso de tener un solo segmento a pintae
 					if(columnas.get(x).size()==1)
 					{
-
-						int segmento = columnas.get(x).get(0);
-						
-						if( matriz[0][x] == '#')
+						/**PINTAR REGLA 1 EN COLUMNA*/	
+						if(columnas.get(x).get(0) == N)
 						{
-							for(int i=0; i<segmento; i++)
+							for(int i=0; i<columnas.get(x).get(0); i++)
 							{
 								matriz[i][x] = '#';
 							}
 							
-							for(int i=segmento; i< N; i++)
-							{
-								matriz[i][x] = '-';
-							}
-							
-							columnasResueltas[x]=1;
+							columnasResueltas[x]=true;
 							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 3 - Columna: "+ (x+1) + ")");
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,1);
+									
 						}
 						
-						if( matriz[N-1][x] == '#')
+						/**PINTAR REGLA 6 EN COLUMNA*/	
+						if(columnas.get(x).get(0) == 0)
 						{
-							for(int i=0; i< N-segmento; i++)
+							for(int i=0; i<N; i++)
 							{
 								matriz[i][x] = '-';
 							}
 							
-							for(int i=N-segmento; i<N; i++)
-							{
-								matriz[i][x] = '#';
-							}
-							columnasResueltas[x]=1;
+							columnasResueltas[x]=true;
 							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 3 - Columna: "+ (x+1) + ")");
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,6);								
+						}
+						
+						/**PINTAR REGLA 3 EN COLUMNA*/	
+						if(columnasResueltas[x]==false)
+						{
+							//Caso en que la primera posición de la columna está pintada
+							if( matriz[0][x] == '#')
+							{
+								for(int i=0; i<segmento; i++)
+								{
+									matriz[i][x] = '#';
+								}
+								
+								for(int i=segmento; i< N; i++)
+								{
+									matriz[i][x] = '-';
+								}
+								
+								columnasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,3);
+							}
+							
+							//Caso en que la ultima posición de la columna está pintada
+							if( matriz[N-1][x] == '#')
+							{
+								for(int i=0; i< N-segmento; i++)
+								{
+									matriz[i][x] = '-';
+								}
+								
+								for(int i=N-segmento; i<N; i++)
+								{
+									matriz[i][x] = '#';
+								}
+								columnasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,3);
+							}
+							
+								
+						}
+						
+						/**PINTAR REGLA 5 EN COLUMNA*/	
+						if(columnas.get(x).get(0) == N-1 && columnasResueltas[x]==false)
+						{
+							//Caso en que la primera posición de la columna está 'no disponible'
+							if( matriz[0][x] == '-')
+							{
+								for(int i=1; i< N; i++)
+								{
+									matriz[i][x] = '#';
+								}
+								columnasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,5);
+							}
+							
+							//Caso en que la ultima posición de la columna está 'no disponible'
+							if( matriz[N-1][x] == '-')
+							{
+								for(int i=0; i< N-1; i++)
+								{
+									matriz[i][x] = '#';
+								}
+								columnasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,5);
+							}
+									
+						}
+						
+						/**PINTAR REGLA 9 EN COLUMNA*/	
+						if(posPrimerPintado > -1)
+						{
+							if(disponiblesInicio == false && columnasResueltas[x] == false)
+							{
+								//Se pinta el segmento completo a partir de la primera posición pintada
+								for(int i=posPrimerPintado; i< posPrimerPintado + segmento; i++)
+								{
+									matriz[i][x] = '#';
+								}
+								
+								//Se actualizan las posiciones (posteriores al segmento) de 'disponibles' a 'no disponibles' 
+								for(int i=posPrimerPintado+segmento; i<N; i++)
+								{	
+									if( matriz[i][x] == ' ' )
+										matriz[i][x] = '-';	
+	
+								}	
+								
+								columnasResueltas[x]=true;
+								iteracion++;
+								mostrarMatriz(N,M,matriz,iteracion,indice,tipo,9);
+							}
 						}
 						
 							
 					}
 					
-					//PINTAR REGLA 4 EN COLUMNA
-					if(columnas.get(x).size()==2 )
+					
+					
+					/**PINTAR REGLA 2 EN COLUMNA*/	
+					if(suma == (N-(columnas.get(x).size()-1)) && columnasResueltas[x]==false)
+					{
+						
+						int indiceColumna = 0;
+						
+						//Se pintan todos los segmentos de la columna
+						for(int i=0; i<columnas.get(x).size(); i++)
+						{
+							segmento = columnas.get(x).get(i);
+							
+							//Se pinta un segmento completo
+							for(int j=0; j<segmento; j++)
+							{
+								matriz[indiceColumna][x]='#';
+								indiceColumna++;
+							}
+							
+							//Se agrega un espacio entre segmentos (posición 'no disponible')
+							if(i<columnas.get(x).size()-1)
+							{
+								matriz[indiceColumna][x]='-';
+								indiceColumna++;
+							}
+							
+						}
+						columnasResueltas[x]=true;
+						iteracion++;
+						mostrarMatriz(N,M,matriz,iteracion,indice,tipo,2); 
+											
+					}
+					
+					/**PINTAR REGLA 4 EN COLUMNA*/	
+					if(columnas.get(x).size()==2 && columnasResueltas[x]==false)
 					{
 						
 						if( matriz[0][x] == '#' && matriz[N-1][x] == '#' )
@@ -342,90 +633,125 @@ public class main {
 							int primerSegmento = columnas.get(x).get(0);
 							int segundoSegmento = columnas.get(x).get(1);
 							
+							//Se pinta el primer segmento al inicio
 							for(int i=0; i< primerSegmento; i++)
 							{
 								matriz[i][x] = '#';
 							}
 							
+							//Se pinta el segundo segmento al final
 							for(int i= N-1; i >= N-segundoSegmento; i--)
 							{
 								matriz[i][x] = '#';
 							}
 							
+							//Se agregan espacios (posiciones 'no disponibles' entre ambos segmentos
 							for(int i= primerSegmento; i < N-segundoSegmento; i++)
 							{
 								matriz[i][x] = '-';
 							}
 							
-							columnasResueltas[x]=1;
+							columnasResueltas[x]=true;
 							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 4 - Columna: "+ (x+1) + ")");
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,4);
 						}
 						
 					}
 					
 					
+					//MARCAR COLUMNA COMO RESUELTA SI LA CANTIDAD DE POSICIONES PINTADAS ES
+					//IGUAL A LA CANTIDAD DE POSICIONES A PINTAR
 					
-					//PINTAR REGLA 5 EN COLUMNA
-					if(columnas.get(x).size()==1 && columnas.get(x).get(0) == N-1)
+					
+					if(columnasResueltas[x]==false)
 					{
 						
-						if( matriz[0][x] == '-')
+						boolean posicionesVacias = false;
+						int sumaPintadosEnColumna = 0;
+						
+						for(int i=0; i< N; i++)
 						{
-							for(int i=1; i< N; i++)
-							{
-								matriz[i][x] = '#';
-							}
-							columnasResueltas[x]=1;
-							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 5 - Columna: "+ (x+1) + ")");
+							//Determina si existen posiciones disponibles
+							if( matriz[i][x] == ' ')
+								posicionesVacias = true;
+							
+							//Suma la cantidad de posiciones pintadas
+							if( matriz[i][x] == '#')
+								sumaPintadosEnColumna++;
 						}
 						
-
-						if( matriz[N-1][x] == '-')
+						
+						/**PINTAR REGLA 8 EN COLUMNA*/	
+						if(posicionesVacias == false)
 						{
-							for(int i=0; i< N-1; i++)
-							{
-								matriz[i][x] = '#';
-							}
-							columnasResueltas[x]=1;
+							columnasResueltas[x]=true;
 							iteracion++;
-							mostrarMatriz(N,M,matriz,iteracion);
-							System.out.println("\n(Regla 5 - Columna: "+ (x+1) + ")");
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,8);
+							
 						}
-								
+
+						
+						/**PINTAR REGLA 7 EN COLUMNA*/	
+						
+						//Determina si la suma de las posiciones pintadas en la columna es
+						//igual a la suma de posiciones a pintar
+						if(sumaPintadosEnColumna == suma && columnasResueltas[x]==false)
+						{
+							//Las posiciones 'disponibles' se actualizan a 'no disponibles'
+							for(int i=0; i< N; i++)
+							{
+								if( matriz[i][x] == ' ' )
+									matriz[i][x] = '-';	
+							}
+							
+							columnasResueltas[x]=true;
+							iteracion++;
+							mostrarMatriz(N,M,matriz,iteracion,indice,tipo,7);
+						}
+						
 					}
+
 					
 				}
 				
-			}
+			}//Fin - For de columnas
 			
 			cont++;
-					
 
-		}
+		}//Fin - While
         
-		/*
 		
-		if(nonoResuelto(filasResueltas, columnasResueltas))
-			System.out.println("\n\nJUEGO TERMINADO");
-		else
-			System.out.println("\n\nJUEGO INCOMPLETO");
-		*/
+		
+		
+		
 		
 		System.out.print("\n\n***************************************");
 		System.out.print("\n             NONOGRAMA                 \n");
+
+		
+		if(nonoResuelto(filasResueltas, columnasResueltas))
+			System.out.println("\n\tJUEGO TERMINADO :)");
+		else
+			System.out.println("\n\tJUEGO INCOMPLETO :(");
+		
 		System.out.print("\n***************************************\n");
+		
 		mostrarMatrizCompleta(N,M,matriz,columnas,filas);
 		
+		System.out.print("\n\n***************************************");
+		System.out.print("\n         FILAS Y COLUMNAS              \n");
+		System.out.print("\n***************************************\n");
+		
+		mostrarResueltas(filasResueltas, columnasResueltas);
+		
+			
 	}
-	
-	
-	
-	public static void mostrarMatriz(int N, int M , char matriz[][], int iteracion)
+
+	public static void mostrarMatriz(int N, int M , char matriz[][], int iteracion, int indice, String tipo,  int regla )
 	{
+		String columna = "columna";
+		String fila = "fila";
+		
 		System.out.print("\n-----------------------------------");
 		System.out.print("\n\tIteracion: "+ iteracion + "\n\n");
 		for(int i=0; i<N; i++)
@@ -438,10 +764,15 @@ public class main {
 			
 		}
 		
+	
+		if(columna.equals(tipo))
+			System.out.println("\n(Columna " + (indice+1) + " - Regla: "+ regla + ")");
+		
+		if(fila.equals(tipo))
+			System.out.println("\n(Fila " + (indice+1) + " - Regla: "+ regla + ")");
 		
 	}
-	
-	
+
 	public static void mostrarMatrizCompleta(int N, int M , char matriz[][], ArrayList<ArrayList<Integer>> columnas, ArrayList<ArrayList<Integer>> filas)
 	{
 		
@@ -515,29 +846,34 @@ public class main {
 			
 	}
 	
-	public static boolean nonoResuelto(int[] filasResueltas, int[] columnasResueltas)
+	public static void mostrarResueltas(boolean[] filasResueltas, boolean[] columnasResueltas)
+	{
+
+		for(int i=0 ; i<filasResueltas.length ; i++)
+			System.out.println("\n(Fila: "+ (i+1) + " -> " + filasResueltas[i]+")");
+		
+		for(int i=0 ; i<columnasResueltas.length ; i++)
+			System.out.println("\n(Columna: "+ (i+1) + " -> " + columnasResueltas[i]+")");
+		
+	}
+	
+	public static boolean nonoResuelto(boolean[] filasResueltas, boolean[] columnasResueltas)
 	{
 
 		for(int i=0; i<columnasResueltas.length; i++)
 		{
-			if(columnasResueltas[i]==0)
+			if(columnasResueltas[i]==false)
 				return false;
 		}
 		
 		for(int i=0; i<filasResueltas.length; i++)
 		{
-			if(filasResueltas[i]==0)
+			if(filasResueltas[i]==false)
 				return false;
 		}
 		
 		return true;
-		/*
-		for(int i=0 ; i<N ; i++)
-			System.out.println("\n(Fila: "+ (i+1) + " -> " + filasResueltas[i]+")");
-		
-		for(int i=0 ; i<N ; i++)
-			System.out.println("\n(Columna: "+ (i+1) + " -> " + columnasResueltas[i]+")");
-		*/
+
 	}
 	
 	public static boolean sinAvance(int[] filasResueltas, int[] columnasResueltas, int[] auxColResueltas, int[] auxFilResueltas)
@@ -564,6 +900,5 @@ public class main {
 			return false;
 	}
 	
-
 
 }
